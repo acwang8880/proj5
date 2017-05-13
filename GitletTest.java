@@ -21,20 +21,20 @@ import org.junit.Test;
 /**
  * Class that provides JUnit tests for Gitlet, as well as a couple of utility
  * methods.
- * 
+ *
  * @author Joseph Moghadam
- * 
+ *
  *         Some code adapted from StackOverflow:
- * 
+ *
  *         http://stackoverflow.com/questions
  *         /779519/delete-files-recursively-in-java
- * 
+ *
  *         http://stackoverflow.com/questions/326390/how-to-create-a-java-string
  *         -from-the-contents-of-a-file
- * 
+ *
  *         http://stackoverflow.com/questions/1119385/junit-test-for-system-out-
  *         println
- * 
+ *
  */
 public class GitletTest {
 	private static final String GITLET_DIR = ".gitlet/";
@@ -44,9 +44,27 @@ public class GitletTest {
 	private static final String LINE_SEPARATOR = "\r\n|[\r\n]";
 
 	/**
+	 * use 'Gitlet fast (same JVM process)' vs 'Gitlet slow (different process)'
+	 *
+	 * These should ideally be identical if you are not storing any state in
+	 * static variables (i.e. you are serializing all internal state to the disk
+	 * every time your main method is called). Gitlet fast will not clear them,
+	 * Gitlet slow will.
+	 *
+	 * Gitlet fast is faster, doesn't require you to set up java on your classpath,
+	 * AND lets you debug your code/test easily, so it's the default here.
+	 * However, Gitlet fast will break if you use `System.exit` in your code.
+	 *
+	 * NOTE: the autograder uses the equivalent of Gitlet slow, so make sure you
+	 * are not *abusing* statics and as always, make sure your code works with the
+	 * Autograder -- it has the final say on your score.
+	 */
+	private static final boolean USE_GITLET_FAST = true;
+
+	/**
 	 * Deletes existing gitlet system, resets the folder that stores files used
 	 * in testing.
-	 * 
+	 *
 	 * This method runs before every @Test method. This is important to enforce
 	 * that all tests are independent and do not interact with one another.
 	 */
@@ -95,7 +113,7 @@ public class GitletTest {
 		gitlet("add", wugFileName);
 		gitlet("commit", "added wug");
 		writeFile(wugFileName, "This is not a wug.");
-		gitlet("checkout", wugFileName);
+		gitlet("checkout", "--", wugFileName);
 		assertEquals(wugText, getText(wugFileName));
 	}
 
@@ -120,18 +138,25 @@ public class GitletTest {
 				extractCommitMessages(logContent));
 	}
 
+	private static String gitlet(String... args) {
+		if (USE_GITLET_FAST) {
+			return gitletFast(args);
+		} else {
+			return gitletSlow(args);
+		}
+	}
+
 	/**
-	 * Calls a gitlet command using the terminal.
-	 * 
+	 * Gitlet Slow: Calls a gitlet command using the terminal.
+	 *
 	 * Warning: Gitlet will not print out anything _while_ it runs through this
 	 * command, though it will print out things at the end of this command. It
 	 * will also return this as a string.
-	 * 
+	 *
 	 * The '...' syntax allows you to pass in an arbitrary number of String
 	 * arguments, which are packaged into a String[].
 	 */
-	private static String gitlet(String... args) {
-
+	private static String gitletSlow(String... args) {
 		String[] commandLineArgs = new String[args.length + 2];
 		commandLineArgs[0] = "java";
 		commandLineArgs[1] = "Gitlet";
@@ -149,7 +174,7 @@ public class GitletTest {
 	 * cheating the concept of end-to-end tests. But, this allows you to
 	 * actually use the debugger during the tests, which you might find helpful.
 	 * It's also a lot faster.
-	 * 
+	 *
 	 * Warning: Like the other version of this method, Gitlet will not print out
 	 * anything _while_ it runs through this command, though it will print out
 	 * things at the end of this command. It will also return what it prints as
@@ -226,7 +251,7 @@ public class GitletTest {
 
 	/**
 	 * Deletes the file and all files inside it, if it is a directory.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	private static void recursiveDelete(File d) throws IOException {
@@ -258,7 +283,7 @@ public class GitletTest {
 	/**
 	 * Executes the given command on the terminal, and return what it prints out
 	 * as a string.
-	 * 
+	 *
 	 * Example: If you want to call the terminal command `java Gitlet add
 	 * wug.txt` you would call the method like so: `command("java", "Gitlet",
 	 * "add", "wug.txt");` The `...` syntax allows you to pass in however many
