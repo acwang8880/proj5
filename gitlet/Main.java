@@ -1,6 +1,9 @@
 package gitlet;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -10,14 +13,10 @@ import java.util.HashMap;
  */
 public class Main {
 
-    //Keeps a list of commits, with names
-    private Map<String, Commit> headPointers;
-
-    Main() {
-        headPointers = new HashMap<>();
-    }
-
     public static void main(String[] args) {
+
+        System.out.println("Working Directory = " +
+                System.getProperty("user.dir").replaceAll("\\\\","/"));
 
         if (args.length == 0) {
             System.out.println("Please enter a command.");
@@ -28,7 +27,7 @@ public class Main {
         String command = args[0];
         switch (command) {
             case "init":
-                initGitlet();
+                GitTree.initGitlet();
                 break;
 
             case "add":
@@ -84,34 +83,5 @@ public class Main {
                 return;
         }
 
-
-    }
-
-    /* Performs the initialization of gitlet */
-    static void initGitlet() {
-        String currDirPath = System.getProperty("user.dir");
-        File currDir = new File(currDirPath);
-        File[] filesinDir = currDir.listFiles();
-        for (File file : filesinDir) {
-            if (file.getName().equals(".gitlet")) {
-                System.out.println("A gitlet version-control system already " +
-                        "exists in the current directory.");
-                return;
-            }
-        }
-        Main gitlet = new Main();
-        gitlet.addHeadPointer("master", gitlet.initCommit());
-        File gitletDir = new File(".gitlet");
-        gitletDir.mkdir();
-    }
-
-    /* Creates an initial commit */
-    Commit initCommit() {
-        return new Commit("initial commit", new HashMap<String, Blob>(), null);
-    }
-
-    /* Adds the (name, commit) pair into the headPointers map */
-    void addHeadPointer(String name, Commit commit) {
-        headPointers.put(name, commit);
     }
 }
