@@ -8,14 +8,12 @@ package gitlet;
 class Blob {
 
     private String filename;
-    private int versionNumber;
-    private String id;
+    int versionNumber;
+    String id;
 
     Blob(String filename, int versionNumber) {
         this.filename = filename;
         this.versionNumber = versionNumber;
     }
-
-
 
 }

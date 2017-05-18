@@ -13,6 +13,8 @@ import java.util.HashMap;
  */
 public class Main {
 
+    static GitTree gitTree = new GitTree();
+
     public static void main(String[] args) {
 
         System.out.println("Working Directory = " +
@@ -27,11 +29,12 @@ public class Main {
         String command = args[0];
         switch (command) {
             case "init":
-                GitTree.initGitlet();
+                gitTree.initGitlet();
                 break;
 
             case "add":
-
+                String filename = args[1];
+                gitTree.addFile(filename);
                 break;
 
             case "commit":
